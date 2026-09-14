@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Webarchy - a tiling desktop in a browser tab</title>
+    <meta name="description" content="Webarchy is a keyboard-first tiling desktop that runs in a browser tab. Tiles split the screen instead of stacking, and you decide what goes on them." />
+    <meta name="color-scheme" content="dark light" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23070a10'/%3E%3Crect x='2' y='2' width='6' height='12' rx='1.5' fill='%237aa2f7'/%3E%3Crect x='9' y='2' width='5' height='5' rx='1.5' fill='%237aa2f7' opacity='.6'/%3E%3Crect x='9' y='8' width='5' height='6' rx='1.5' fill='%237aa2f7' opacity='.4'/%3E%3C/svg%3E"
+    />
+    <style>
+      /* The desktop brings its own colours; this only keeps the page from flashing
+         white before the bundle runs, and hands the whole viewport over to it. */
+      html, body { margin: 0; height: 100%; background: #070a10; }
+      body { overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <!-- Webarchy mounts into this element. That is the whole embedding contract:
+         one container plus one script tag, on any page you like. -->
+    <div id="webarchy"></div>
+    <script src="webarchy.js"></script>
+  </body>
+</html>
