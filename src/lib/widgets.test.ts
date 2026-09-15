@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test"
 import { stubBrowser } from "./testing.js"
-import { builtinWidgets, findWidget, isKnownWidget, linkKind, widgetList } from "./widgets.js"
+import { builtinWidgets, findWidget, isKnownWidget, knownWidgetCheck, linkKind, widgetList } from "./widgets.js"
 
 beforeEach(stubBrowser)
 
@@ -40,5 +40,24 @@ describe("kafelek z adresu, bez instalacji", () => {
   // Nieznany klucz nie moze wywrocic pulpitu - wraca pierwszy widget z rejestru.
   test("smiec zamiast klucza dostaje zastepczy widget", () => {
     expect(findWidget("link:").kind).toBe(builtinWidgets()[0].kind)
+  })
+})
+
+describe("knownWidgetCheck", () => {
+  // Ta sama odpowiedz co isKnownWidget, tylko rejestr powstaje raz na cala serie -
+  // przywracany uklad pyta raz na lisc.
+  test("odpowiada tak samo jak isKnownWidget", () => {
+    const known = knownWidgetCheck()
+
+    for (const kind of [...widgetList().map((widget) => widget.kind), "nie-ma-takiego", "link:"]) {
+      expect(known(kind)).toBe(isKnownWidget(kind))
+    }
+  })
+
+  test("adres rozstrzyga sam ksztalt, nie rejestr", () => {
+    const known = knownWidgetCheck()
+
+    expect(known(linkKind("https://example.com/", "Strona"))).toBe(true)
+    expect(known("link:javascript:alert(1) Atak")).toBe(false)
   })
 })

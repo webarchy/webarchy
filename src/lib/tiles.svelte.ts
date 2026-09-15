@@ -2,7 +2,7 @@ import * as bsp from "../core/bsp.js"
 import {
   DESKTOPS, emptyDesk, readLayout, saveLayout, saveLayoutSoon, type StoredDesk,
 } from "./layout_store.js"
-import { isKnownWidget, type WidgetKind } from "./widgets.js"
+import { knownWidgetCheck, type WidgetKind } from "./widgets.js"
 
 // Jeden pulpit w pasku: numer taki jak na klawiaturze, czy cos na nim stoi i czy jest
 // na wierzchu. Pasek nie dostaje drzew - ma narysowac cyfry, a nie znac uklad.
@@ -55,7 +55,7 @@ export function createWorkspace(firstWidget: WidgetKind | null): Workspace {
   // Uklad z poprzedniej wizyty ma pierwszenstwo przed kafelkiem startowym - uzytkownik
   // wraca do tego, co zostawil. Licznik id idzie dalej od najwyzszego przywroconego,
   // inaczej nowy kafelek dostalby id, ktore juz jest w drzewie.
-  const stored = readLayout(isKnownWidget)
+  const stored = readLayout(knownWidgetCheck())
   let counter = stored ? stored.counter : 0
   const nextId = (prefix: string) => `${prefix}${++counter}`
 
