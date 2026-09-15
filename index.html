@@ -6,6 +6,24 @@
     <title>Webarchy - a tiling desktop in a browser tab</title>
     <meta name="description" content="Webarchy is a keyboard-first tiling desktop that runs in a browser tab. Tiles split the screen instead of stacking, and you decide what goes on them." />
     <meta name="color-scheme" content="dark light" />
+    <!-- Ostrej CSP tu swiadomie nie ma. Cala rzecz aplikacji JavaScript polega na tym,
+         ze wklejony kod (modul blob:) i modul spod adresu wybranego przez uzytkownika maja
+         sie wykonac - script-src musialaby wiec przepuscic dokladnie to, przed czym mialaby
+         chronic. Zostaje to, co CSP moze zamknac naprawde: drzwi, z ktorych pulpit nie
+         korzysta.
+
+         Najwazniejsze jest base-uri. Bundel rozwija adresy aplikacji katalogowych
+         i tapet wzgledem wlasnego <script src> (lib/bundle.ts), wiec wstrzykniety <base>
+         po cichu przekierowalby kazdy import. object-src zamyka <object>/<embed>,
+         form-action - wysylke formularza (jedyny formularz w Menu.svelte i tak konczy
+         sie preventDefault).
+
+         frame-ancestors celowo nie ma: Webarchy ma sie dac osadzic na cudzej stronie.
+         Ten tag dotyczy tylko strony samodzielnej, osadzajacy przynosi wlasna polityke. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23070a10'/%3E%3Crect x='2' y='2' width='6' height='12' rx='1.5' fill='%237aa2f7'/%3E%3Crect x='9' y='2' width='5' height='5' rx='1.5' fill='%237aa2f7' opacity='.6'/%3E%3Crect x='9' y='8' width='5' height='6' rx='1.5' fill='%237aa2f7' opacity='.4'/%3E%3C/svg%3E"

@@ -61,6 +61,17 @@ const CSS = `
 .fdp-key:hover { opacity:1 }
 `
 
+// Element z klasa, podpiety od razu pod rodzica. Szkielet skladany w ten sposob
+// wychodzi krotszy niz innerHTML z doszukiwaniem sie wezlow po selektorach, a przy
+// okazji nie uczy zlego nawyku: ten sam napis, ale sklejony z czymkolwiek spoza kodu,
+// bylby juz dziura. W aplikacji katalogowej, ktora ma byc wzorem do przepisania
+// u siebie, to ma znaczenie.
+function add(parent, tag, className) {
+  const el = parent.appendChild(document.createElement(tag))
+  el.className = className
+  return el
+}
+
 export function mount(el, ctx) {
   const words = texts(ctx.locale)
   let state = initialState()
@@ -70,19 +81,15 @@ export function mount(el, ctx) {
 
   const box = document.createElement("div")
   box.className = "fdp"
-  box.innerHTML = `<p class="fdp-mode"></p>
-    <div class="fdp-time"></div>
-    <div class="fdp-done"></div>
-    <div class="fdp-keys">
-      <button type="button" class="fdp-key" data-act="toggle"></button>
-      <button type="button" class="fdp-key" data-act="reset"></button>
-    </div>`
 
-  const mode = box.querySelector(".fdp-mode")
-  const time = box.querySelector(".fdp-time")
-  const done = box.querySelector(".fdp-done")
-  const run = box.querySelector("[data-act=\"toggle\"]")
-  const again = box.querySelector("[data-act=\"reset\"]")
+  const mode = add(box, "p", "fdp-mode")
+  const time = add(box, "div", "fdp-time")
+  const done = add(box, "div", "fdp-done")
+  const keys = add(box, "div", "fdp-keys")
+  const run = add(keys, "button", "fdp-key")
+  const again = add(keys, "button", "fdp-key")
+  run.type = "button"
+  again.type = "button"
 
   function draw() {
     box.className = state.mode === "work" ? "fdp" : "fdp fdp-rest"

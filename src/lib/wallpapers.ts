@@ -176,7 +176,13 @@ function imageLayer(wall: Wallpaper): string {
   if (wall.image == null) return "none"
 
   const url = assetUrl(wall.image)
-  return url == null ? "none" : `url("${url}")`
+  if (url == null) return "none"
+
+  // assetUrl() oddaje adres przepuszczony przez WHATWG URL, wiec cudzyslowu tam juz
+  // nie bedzie - ale to jedyne miejsce, gdzie tekst spoza kodu wchodzi prosto w CSS,
+  // i nie chcemy, zeby trzymalo sie wylacznie na zalozeniu o cudzym module. Zamykajacy
+  // cudzyslow konczylby url() i otwieral reszte deklaracji.
+  return `url("${url.replaceAll('"', "%22")}")`
 }
 
 // Podglad tapety na liscie: obrazek w miniaturze albo te same trzy plamy scisniete

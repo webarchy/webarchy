@@ -11,6 +11,11 @@ import { watch as fsWatch } from "fs"
 
 const PORT = Number(process.env.PORT) || 5173
 
+// Domyslnie tylko petla zwrotna: serwer deweloperski oddaje dist/ bez zadnego pytania
+// o haslo, a Bun.serve bez tego wystawilby go na cala siec lokalna. HOST=0.0.0.0
+// wtedy, gdy naprawde chcemy otworzyc pulpit z telefonu.
+const HOST = process.env.HOST || "127.0.0.1"
+
 const tsPreprocess = sveltePreprocess()
 
 const sveltePlugin = {
@@ -126,6 +131,21 @@ if (!dev) process.exit(0)
 // --- dev server: static dist/ + websocket live reload ---
 const wsClients = new Set()
 
+// Do websocketu na localhoscie dobije sie dowolna otwarta w przegladarce strona -
+// przy uscisku dloni zasada tego samego zrodla nie obowiazuje. Tym kanalem nie plynie
+// nic tajnego, ale nie ma tez powodu, zeby trzymala go obca strona. Brak naglowka
+// Origin przepuszczamy: tak wyglada klient spoza przegladarki (curl, skrypt).
+function ownOrigin(req) {
+  const origin = req.headers.get("origin")
+  if (origin == null) return true
+
+  try {
+    return new URL(origin).hostname === new URL(`http://${req.headers.get("host")}`).hostname
+  } catch {
+    return false
+  }
+}
+
 function notifyReload() {
   for (const ws of wsClients) {
     try { ws.send("reload") } catch { wsClients.delete(ws) }
@@ -133,11 +153,13 @@ function notifyReload() {
 }
 
 Bun.serve({
+  hostname: HOST,
   port: PORT,
   async fetch(req, server) {
     const url = new URL(req.url)
 
     if (url.pathname === "/_reload") {
+      if (!ownOrigin(req)) return new Response("Forbidden", { status: 403 })
       if (server.upgrade(req)) return
       return new Response("WebSocket upgrade failed", { status: 400 })
     }
@@ -157,15 +179,32 @@ Bun.serve({
   },
 })
 
-console.log(`\nWebarchy: http://localhost:${PORT}`)
+console.log(`\nWebarchy: http://${HOST}:${PORT}`)
 console.log("Watching src/ for changes...\n")
 
+// Zapis, ktory trafi w srodek budowania, nie moze przepasc - zostaje zapamietany
+// i odtworzony, gdy biezaca budowa sie skonczy. Porzucanie go wygladalo dokladnie jak
+// zawieszony watcher: zapisujesz, nic sie nie przeladowuje i pomaga dopiero zapisanie
+// tego samego pliku jeszcze raz.
 let rebuilding = false
-fsWatch("src", { recursive: true }, async (_event, filename) => {
-  if (rebuilding) return
+let pending = false
+
+async function rebuild(filename) {
+  if (rebuilding) {
+    pending = true
+    return
+  }
+
   rebuilding = true
   console.log("Changed:", filename)
   await buildAll()
   notifyReload()
   rebuilding = false
-})
+
+  if (pending) {
+    pending = false
+    await rebuild(filename)
+  }
+}
+
+fsWatch("src", { recursive: true }, (_event, filename) => void rebuild(filename))
