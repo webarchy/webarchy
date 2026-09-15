@@ -15,7 +15,8 @@ import {
 import { svelteWidget } from "./svelte_widget.js"
 import { normalizeUrl } from "./url.js"
 import {
-  APP_PREFIX, isUrlAppKind, removeUrlApp, urlAppAccent, urlAppKind, urlAppList, type UrlApp, type UrlAppKind,
+  APP_PREFIX, isUrlAppKind, moduleHost, removeUrlApp, urlAppAccent, urlAppKind, urlAppList,
+  type UrlApp, type UrlAppKind,
 } from "./url_apps.js"
 import {
   isDefaultWebApp, isWebAppKind, removeWebApp, webAppAccent, webAppKind, webAppName, WEB_PREFIX, webAppList,
@@ -168,6 +169,25 @@ export function allWidgets(): WidgetDef<WidgetKind>[] {
 
 export function isUninstalled(kind: string): boolean {
   return isHidden(kind)
+}
+
+// Skad przyjdzie kod tej apki - host cudzego serwera albo null, gdy nie ma o czym
+// mowic (apka wbudowana, wklejony kod, modul obok bundla). Patrz url_apps.ts,
+// moduleHost: to jedyne pochodzenie, ktore uzytkownik ma widziec takze po instalacji.
+export function widgetSource(kind: string): string | null {
+  return widgetSourceLookup()(kind)
+}
+
+// To samo pytanie zadawane seryjnie - menu pyta raz na pozycje listy, a kazde
+// widgetSource() to osobny odczyt localStorage'u (jak przy knownWidgetCheck nizej).
+export function widgetSourceLookup(): (_kind: string) => string | null {
+  const hosts = new Map<string, string>()
+  for (const app of urlAppList()) {
+    const host = moduleHost(app.src)
+    if (host != null) hosts.set(urlAppKind(app), host)
+  }
+
+  return (kind) => hosts.get(kind) ?? null
 }
 
 // Wbudowana i domyslna aplikacja tylko sie chowa (siedzi w kodzie, wiec wraca),

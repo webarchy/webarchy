@@ -11,7 +11,7 @@
 // Uwaga o zaufaniu jest ta sama co przy wklejonym kodzie i nie znika przez to, ze kod
 // lezy na cudzym serwerze: modul dziala w tej stronie, z sesja uzytkownika. Adres
 // zmienia tylko tyle, ze od tej pory kod moze po cichu podmienic wlasciciel hosta.
-import { assetUrl } from "./bundle.js"
+import { assetUrl, bundleBase } from "./bundle.js"
 import { uniqueId } from "./ids.js"
 import { readList, writeJson } from "./store.js"
 
@@ -53,6 +53,29 @@ export function urlAppAccent(app: UrlApp): string {
 // smiec, "javascript:"), zeby uzytkownik dostal blad w formularzu, a nie pusty kafelek.
 export function isRunnableSrc(src: string): boolean {
   return assetUrl(src) != null
+}
+
+// Host, spod ktorego przyjdzie kod - albo null, gdy modul lezy tam, co bundel
+// (wpis katalogowy, wlasny hosting). Tylko obcy host jest tu informacja: apka z cudzego
+// serwera wykonuje sie w naszym origin przy KAZDYM wejsciu na strone, a jej wlasciciel
+// moze ja po cichu podmienic.
+//
+// Ostrzezenie przy instalacji pada raz i znika razem z formularzem. To jest ta sama
+// rzecz powiedziana tam, gdzie widac ja pozniej: w pasku kafelka i na liscie
+// "Odinstaluj" - zeby "evil.example/app.js" nie chowalo sie za nazwa "Kalkulator".
+export function moduleHost(src: string): string | null {
+  const url = assetUrl(src)
+  if (url == null) return null
+
+  try {
+    const parsed = new URL(url)
+    const base = bundleBase()
+    const own = base === "" ? null : new URL(base).origin
+
+    return parsed.origin === own ? null : parsed.host.replace(/^www\./, "")
+  } catch {
+    return null
+  }
 }
 
 export function readUrlApps(): UrlApp[] {
