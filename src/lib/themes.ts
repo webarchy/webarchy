@@ -15,6 +15,7 @@
 // wariant (klucz "color-theme" w localStorage albo ustawienie systemu). To dwie rozne osie
 // i mieszanie ich w jednym atrybucie konczyloby sie zgadywaniem, ktora wygrywa.
 import type { TKey } from "./i18n.js"
+import { readText, writeText } from "./store.js"
 
 export interface Skin {
   id: string
@@ -52,32 +53,20 @@ export function findSkin(id: string | null): Skin {
 }
 
 export function readSkin(): Skin {
-  try {
-    return findSkin(localStorage.getItem(STORAGE_KEY))
-  } catch {
-    return defaultSkin()
-  }
+  return findSkin(readText(STORAGE_KEY))
 }
 
 export function saveSkin(skin: Skin) {
   applySkin(skin)
-  try {
-    localStorage.setItem(STORAGE_KEY, skin.id)
-  } catch {
-    // trudno - motyw wroci do domyslnego po odswiezeniu
-  }
+  // trudno - motyw wroci do domyslnego po odswiezeniu
+  writeText(STORAGE_KEY, skin.id)
 }
 
 // Jasny czy ciemny wedlug otoczenia: klucz "color-theme" w localStorage, ktory zwykle
 // ustawia strona osadzajaca pulpit, a gdy go nie ma - ustawienie systemu. Tutaj jest po to,
 // zeby motyw "Systemowy" mial dokad wrocic po wylaczeniu motywu nazwanego.
 export function systemTheme(): "dark" | "light" {
-  let theme = null
-  try {
-    theme = localStorage.getItem("color-theme")
-  } catch {
-    theme = null
-  }
+  const theme = readText("color-theme")
   if (theme === "dark" || theme === "light") return theme
 
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"

@@ -6,28 +6,19 @@
 // Po co osobny znacznik, a nie sprawdzanie "czy jest na liscie": odinstalowana apka ma
 // zostac odinstalowana. Bez tego kazde odswiezenie strony zakladaloby ja z powrotem.
 import { catalogSrc, catalogTitle, preinstalledApps } from "./catalog.js"
+import { isText, readList, writeJson } from "./store.js"
 import { installUrlApp } from "./url_apps.js"
 
 const STORAGE_KEY = "webarchy-preinstalled"
 
 // Klucze apek, ktore juz kiedys zalozylismy w tej przegladarce.
 function readSeeded(): string[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
-    if (!Array.isArray(parsed)) return []
-
-    return parsed.filter((key): key is string => typeof key === "string")
-  } catch {
-    return []
-  }
+  return readList(STORAGE_KEY, isText)
 }
 
 function saveSeeded(keys: readonly string[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(keys))
-  } catch {
-    // trudno - apka zalozy sie jeszcze raz przy nastepnym wejsciu
-  }
+  // trudno - apka zalozy sie jeszcze raz przy nastepnym wejsciu
+  writeJson(STORAGE_KEY, keys)
 }
 
 // Wolane raz, przed zamontowaniem pulpitu (main.js). Klucz odhaczamy niezaleznie od

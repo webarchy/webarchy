@@ -5,24 +5,19 @@
 // Kazde ustawienie ma domyslna wartosc taka, jak pulpit wygladal zanim doszlo - brak
 // zapisu i zapis polamany znacza wiec to samo: zostaje domyslnie.
 
+import { readText, writeText } from "./store.js"
+
 const HINTS_KEY = "webarchy-hints"
 
 // Pasek podpowiedzi na gorze. Domyslnie wlaczony, bo nowy uzytkownik nie zna skrotow;
 // kto je zna, wylacza go raz i ma czysty pasek.
 export function readHints(): boolean {
-  try {
-    return localStorage.getItem(HINTS_KEY) !== "off"
-  } catch {
-    return true
-  }
+  return readText(HINTS_KEY) !== "off"
 }
 
 export function saveHints(on: boolean) {
-  try {
-    localStorage.setItem(HINTS_KEY, on ? "on" : "off")
-  } catch {
-    // trudno - podpowiedzi wroca po odswiezeniu
-  }
+  // trudno - podpowiedzi wroca po odswiezeniu
+  writeText(HINTS_KEY, on ? "on" : "off")
 }
 
 const GLASS_KEY = "webarchy-glass"
@@ -32,19 +27,12 @@ const GLASS_KEY = "webarchy-glass"
 // (blur to najdrozsza rzecz na tym ekranie) i dla tych, ktorym tapeta pod tekstem
 // przeszkadza.
 export function readGlass(): boolean {
-  try {
-    return localStorage.getItem(GLASS_KEY) !== "off"
-  } catch {
-    return true
-  }
+  return readText(GLASS_KEY) !== "off"
 }
 
 export function saveGlass(on: boolean) {
-  try {
-    localStorage.setItem(GLASS_KEY, on ? "on" : "off")
-  } catch {
-    // trudno - szklo wroci po odswiezeniu
-  }
+  // trudno - szklo wroci po odswiezeniu
+  writeText(GLASS_KEY, on ? "on" : "off")
 }
 
 // Jedyne miejsce, ktore dotyka DOM-u: jeden atrybut na <html>, reszta dzieje sie w CSS
@@ -62,19 +50,12 @@ const LANG_KEY = "webarchy-lang"
 // Jezyk pulpitu. Brak zapisu znaczy "tak jak przegladarka uzytkownika" - stad null
 // zamiast domyslnego kodu: to lib/i18n.ts decyduje, co zrobic z pustym wyborem.
 export function readLang(): string | null {
-  try {
-    return localStorage.getItem(LANG_KEY)
-  } catch {
-    return null
-  }
+  return readText(LANG_KEY)
 }
 
 export function saveLang(code: string) {
-  try {
-    localStorage.setItem(LANG_KEY, code)
-  } catch {
-    // trudno - pulpit wroci do jezyka strony
-  }
+  // trudno - pulpit wroci do jezyka strony
+  writeText(LANG_KEY, code)
 }
 
 const SEEN_KEY = "webarchy-seen"
@@ -84,17 +65,10 @@ const SEEN_KEY = "webarchy-seen"
 // localStorage) znaczy "pierwszy raz" - gorzej pokazac okno drugi raz niz nie pokazac go
 // wcale temu, dla kogo jest.
 export function readSeen(): boolean {
-  try {
-    return localStorage.getItem(SEEN_KEY) === "yes"
-  } catch {
-    return false
-  }
+  return readText(SEEN_KEY) === "yes"
 }
 
 export function saveSeen() {
-  try {
-    localStorage.setItem(SEEN_KEY, "yes")
-  } catch {
-    // trudno - powitanie pokaze sie przy nastepnym wejsciu
-  }
+  // trudno - powitanie pokaze sie przy nastepnym wejsciu
+  writeText(SEEN_KEY, "yes")
 }

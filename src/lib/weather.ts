@@ -8,6 +8,7 @@
 // wybrane miejsce. Widget (widgets/WeatherWidget.svelte) tylko to rysuje.
 import { getJson } from "./api.js"
 import type { TKey } from "./i18n.js"
+import { readJson, writeJson } from "./store.js"
 
 export interface Place {
   name: string
@@ -200,22 +201,14 @@ export function skyText(code: number): TKey {
 
 // Wybrane miejsce przezywa odswiezenie - tak samo jak tapeta i uklad kafelkow.
 export function readPlace(): Place {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null")
-    const place = parsed as Place | null
-    if (place == null || typeof place.name !== "string") return DEFAULT_PLACE
-    if (typeof place.lat !== "number" || typeof place.lon !== "number") return DEFAULT_PLACE
+  const place = readJson<Place | null>(STORAGE_KEY, null)
+  if (place == null || typeof place.name !== "string") return DEFAULT_PLACE
+  if (typeof place.lat !== "number" || typeof place.lon !== "number") return DEFAULT_PLACE
 
-    return place
-  } catch {
-    return DEFAULT_PLACE
-  }
+  return place
 }
 
 export function savePlace(place: Place) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(roundPlace(place)))
-  } catch {
-    // trudno - miejsce zostanie do konca sesji
-  }
+  // trudno - miejsce zostanie do konca sesji
+  writeJson(STORAGE_KEY, roundPlace(place))
 }

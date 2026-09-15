@@ -13,6 +13,7 @@
 import { assetUrl } from "./bundle.js"
 import { t, type TKey } from "./i18n.js"
 import { uniqueId } from "./ids.js"
+import { readList, readText, writeJson, writeText } from "./store.js"
 import { fileStem, normalizeUrl } from "./url.js"
 
 export interface Wallpaper {
@@ -93,17 +94,10 @@ interface OwnEntry {
   image: string
 }
 
-// localStorage moze zawierac smiec po recznej edycji albo wpis z innej wersji -
-// czytamy defensywnie, bo na tej liscie stoi pierwsze malowanie pulpitu.
+// Na tej liscie stoi pierwsze malowanie pulpitu, wiec zly wpis ma z niej wypasc,
+// a nie zatrzymac start (lib/store.ts).
 function readOwnEntries(): OwnEntry[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(OWN_KEY) || "[]")
-    if (!Array.isArray(parsed)) return []
-
-    return parsed.filter(isOwn)
-  } catch {
-    return []
-  }
+  return readList(OWN_KEY, isOwn)
 }
 
 function isOwn(value: unknown): value is OwnEntry {
@@ -118,11 +112,8 @@ function ownWallpaper(entry: OwnEntry): Wallpaper {
 }
 
 function saveOwnWallpapers(entries: readonly OwnEntry[]) {
-  try {
-    localStorage.setItem(OWN_KEY, JSON.stringify(entries))
-  } catch {
-    // trudno - tapeta zostanie do konca sesji
-  }
+  // trudno - tapeta zostanie do konca sesji
+  writeJson(OWN_KEY, entries)
 }
 
 // Zwraca dodana tapete albo null, gdy adres jest nie do uzycia. Adres sprawdzamy
@@ -156,22 +147,13 @@ function wallpaperLabel(name: string, image: string): string {
   }
 }
 
-// localStorage potrafi rzucic wyjatkiem (tryb prywatny Safari, zablokowane ciasteczka),
-// a tapeta nie jest powodem, zeby pulpit sie nie uruchomil - stad try/catch w obie strony.
 export function readWallpaper(): Wallpaper {
-  try {
-    return findWallpaper(localStorage.getItem(STORAGE_KEY))
-  } catch {
-    return WALLPAPERS[0]
-  }
+  return findWallpaper(readText(STORAGE_KEY))
 }
 
 export function saveWallpaper(wall: Wallpaper) {
-  try {
-    localStorage.setItem(STORAGE_KEY, wall.id)
-  } catch {
-    // trudno - tapeta zostanie do konca sesji
-  }
+  // trudno - tapeta zostanie do konca sesji
+  writeText(STORAGE_KEY, wall.id)
 }
 
 // Jedyne miejsce, ktore dotyka DOM-u: piec zmiennych na <html>, reszta dzieje sie w CSS.

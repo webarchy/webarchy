@@ -13,6 +13,7 @@
 // zmienia tylko tyle, ze od tej pory kod moze po cichu podmienic wlasciciel hosta.
 import { assetUrl } from "./bundle.js"
 import { uniqueId } from "./ids.js"
+import { readList, writeJson } from "./store.js"
 
 export interface UrlApp {
   id: string
@@ -55,14 +56,7 @@ export function isRunnableSrc(src: string): boolean {
 }
 
 export function readUrlApps(): UrlApp[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
-    if (!Array.isArray(parsed)) return []
-
-    return parsed.filter(isUrlApp)
-  } catch {
-    return []
-  }
+  return readList(STORAGE_KEY, isUrlApp)
 }
 
 function isUrlApp(value: unknown): value is UrlApp {
@@ -71,11 +65,8 @@ function isUrlApp(value: unknown): value is UrlApp {
 }
 
 function saveUrlApps(apps: readonly UrlApp[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(apps))
-  } catch {
-    // trudno - aplikacja zostanie do konca sesji
-  }
+  // trudno - aplikacja zostanie do konca sesji
+  writeJson(STORAGE_KEY, apps)
 }
 
 export function urlAppList(): UrlApp[] {
