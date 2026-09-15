@@ -33,10 +33,25 @@ const ARROWS = "←↑↓→"
 // Pulpitow jest dziewiec, bo tyle jest cyfr nad literami (core/keymap.ts).
 const DIGITS = "1-9"
 
+// Klawisz menu do podpowiedzi w pasku. Alt+Spacja dochodzi do strony tylko na macOS -
+// GNOME, KDE i Windows przechwytuja ja same (core/keymap.ts), wiec tam pokazujemy
+// Alt+Enter: podpowiedz ma wprowadzic nowego uzytkownika w menu, a nie w menu okna.
+// Funkcja, a nie stala, bo t() ma byc wywolane po ustaleniu jezyka strony.
+export function menuCombo(): string[] {
+  return [MOD, isMac() ? t("key_space") : t("key_enter")]
+}
+
+// Notka "dlaczego Alt+Enter" do spisu skrotow i okna "O Webarchy". Tylko poza macOS:
+// tam Alt+Spacja dziala i notka bylaby szumem. Z user agenta nie odroznimy GNOME od
+// Hyprlanda, stad "zwykle" w tresci. null = nie pokazuj.
+export function menuNote(): string | null {
+  return isMac() ? null : t("keys_note_space")
+}
+
 // Funkcja, a nie stala, bo t() ma byc wywolane po ustaleniu jezyka strony.
 export function shortcutRows(): ShortcutRow[] {
   return [
-    { combos: [[MOD, t("key_space")]], label: t("keys_launcher") },
+    { combos: [[MOD, t("key_space")], [MOD, t("key_enter")]], label: t("keys_launcher") },
     { combos: [[MOD, "W"]], label: t("close_tile") },
     { combos: [[MOD, "F"]], label: t("keys_zoom") },
     { combos: [[ARROWS], ["hjkl"]], label: t("keys_focus") },

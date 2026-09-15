@@ -11,7 +11,7 @@
   import Keys from "./Keys.svelte"
   import { aboutDialog, type Dialog as DialogData } from "./lib/dialog.js"
   import { currentLocale, setLocale, t } from "./lib/i18n.js"
-  import { MOD } from "./lib/keys.js"
+  import { MOD, menuCombo } from "./lib/keys.js"
   import { rootMenu, type MenuNode } from "./lib/menu.js"
   import { applyGlass, readGlass, readHints, readSeen, saveHints, saveLang, saveSeen } from "./lib/prefs.js"
   import { createWorkspace } from "./lib/tiles.svelte.js"
@@ -184,7 +184,7 @@
          i pointer-events: none - to napis, nie przycisk. -->
       {#if hints}
         <p class="hints">
-          <span><kbd>{MOD}</kbd><kbd>{t("key_space")}</kbd>{t("hint_menu")}</span>
+          <span>{#each menuCombo() as key (key)}<kbd>{key}</kbd>{/each}{t("hint_menu")}</span>
           <span><kbd>{MOD}</kbd><kbd>W</kbd>{t("hint_close")}</span>
           <span><kbd>{MOD}</kbd><kbd>K</kbd>{t("hint_keys")}</span>
         </p>

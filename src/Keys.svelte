@@ -2,7 +2,7 @@
   // Spis skrotow klawiszowych - odpowiednik super+k z Omarchy. Panel przejmuje fokus,
   // Esc go chowa (ten sam skrot, ktory go otworzyl, tez - obsluguje to App.svelte).
   import { t } from "./lib/i18n.js"
-  import { shortcutRows } from "./lib/keys.js"
+  import { menuNote, shortcutRows } from "./lib/keys.js"
 
   interface Props {
     onclose: () => void;
@@ -11,6 +11,7 @@
   let { onclose }: Props = $props()
 
   const rows = shortcutRows()
+  const note = menuNote()
 
   let panel = $state<HTMLDivElement | null>(null)
 
@@ -58,6 +59,7 @@
     </ul>
 
     <p class="note">{t("keys_note")}</p>
+    {#if note}<p class="note">{note}</p>{/if}
   </div>
 </div>
 

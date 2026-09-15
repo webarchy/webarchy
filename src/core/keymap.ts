@@ -90,7 +90,10 @@ export function commandForKey(stroke: KeyStroke, typing = false): Command | null
   }
 
   if (superKey) {
-    if (hasKey(stroke, " ", "Space")) return { type: "open_menu" }
+    // Alt+Spacje zabiera system, zanim zobaczy ja przegladarka: GNOME otwiera nia menu
+    // okna, KDE - KRunnera, a na Windowsie Chrome oddaje ja menu systemowemu okna.
+    // Alt+Enter dochodzi do strony wszedzie, wiec jest drugim wejsciem do tego samego menu.
+    if (hasKey(stroke, " ", "Space") || hasKey(stroke, "enter", "Enter")) return { type: "open_menu" }
     if (hasKey(stroke, "w", "KeyW")) return { type: "close_tile" }
     if (hasKey(stroke, "f", "KeyF")) return { type: "zoom" }
 

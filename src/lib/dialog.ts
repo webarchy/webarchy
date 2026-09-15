@@ -7,6 +7,7 @@
 // z przyciskiem "Zamknij", z nim - pytanie z dwoma przyciskami.
 import { GITHUB_URL, HYPRLAND_URL, OMARCHY_URL, WEBARCHY_URL } from "./help.js"
 import { t } from "./i18n.js"
+import { menuNote } from "./keys.js"
 import { resetSystem } from "./reset.js"
 
 // Odnosnik wpleciony w tekst. Adres jest stala z lib/help.ts, a nie tekstem do tlumaczenia -
@@ -49,12 +50,20 @@ export interface Dialog {
 // wejscie na strone, wiec tresc jest w jednym miejscu. Akapitow bedzie z czasem wiecej;
 // dokladanie ich to dopisanie klucza w locales/*.ts i jednej linijki nizej.
 export function aboutDialog(): Dialog {
+  const note = menuNote()
+
   return {
     id: "about",
     title: t("menu_about"),
     wide: true,
+    // Poza macOS system zjada Alt+Spacje, wiec zaraz po akapicie o klawiaturze stoi
+    // akapit, ktorego skrotu uzyc zamiast niej (lib/keys.ts, menuNote). Akapity mowia
+    // "Super", a notka "Alt", wiec poprzedza ja zdanie ze spisu skrotow o tym, ze
+    // w przegladarce Alt gra role Super.
     body: [
-      t("about_note"), t("about_omarchy"), t("about_apps"), t("about_keys"), t("about_data"), t("about_mit"),
+      t("about_note"), t("about_omarchy"), t("about_apps"), t("about_keys"),
+      ...(note == null ? [] : [`${t("keys_note")} ${note}`]),
+      t("about_data"), t("about_mit"),
     ],
     // Nazwy wlasne, wiec bez t() - te dwa odnosniki wchodza w zdanie, bo i tak pada w nim
     // ich nazwa.
