@@ -25,6 +25,11 @@ export const LIST_LIMIT = 200
 
 // localStorage potrafi rzucic (tryb prywatny) albo zawierac smiec po recznej edycji -
 // w obu wypadkach kafelek wstaje z pusta lista, a nie pada.
+//
+// lib/store.ts robi dokladnie to samo i zaoszczedzilby te kilkanascie linii, ale ta
+// apka celowo nie siega do lib/: bierze z pulpitu tylko kontrakt kafelka i biezacy
+// jezyk (docs/manual-pl.md). Import stad po to, zeby skrocic try/catch, zamienilby
+// wzorzec "apke da sie przepisac do siebie w calosci" na kilka linii mniej.
 export function readTodos(): Todo[] {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")

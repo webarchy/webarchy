@@ -6,7 +6,7 @@
   import { untrack } from "svelte"
   import type { WidgetHandle } from "./core/index.js"
   import { currentLocale, t } from "./lib/i18n.js"
-  import { findWidget } from "./lib/widgets.js"
+  import { findWidget, widgetSource } from "./lib/widgets.js"
 
   interface Props {
     // id kafelka z drzewa BSP - widget dostaje je w kontekscie
@@ -20,7 +20,16 @@
 
   let { id, kind, active = false, onactivate, onclose }: Props = $props()
 
-  const widget = findWidget(kind)
+  // Rejestr czytamy raz, tak samo jak montujemy raz: kafelek zyje z jednym widgetem,
+  // a jezyk przerysowuje caly widok blokiem {#key lang} w App.svelte. `untrack` mowi
+  // to wprost - bez niego kompilator widzi odczyt propsa poza efektem i ostrzega,
+  // ze lapiemy wartosc poczatkowa (a lapiemy ja celowo).
+  const widget = untrack(() => findWidget(kind))
+
+  // Obcy host, spod ktorego doczytuje sie kod apki - null dla wszystkiego innego.
+  // W pasku stoi po to, zeby pochodzenie kodu bylo widac takze po instalacji,
+  // a nie tylko w formularzu (lib/url_apps.ts, moduleHost).
+  const source = untrack(() => widgetSource(kind))
 
   let body = $state<HTMLElement | null>(null)
 
@@ -44,10 +53,16 @@
   })
 </script>
 
-<section class="tile" class:active onpointerdown={onactivate}>
+<!-- Rola "group": kafelek to pojemnik na tresc, a nie kontrolka. Fokus chodzi po nim
+     klawiatura (super+strzalki, patrz Keys.svelte), wiec pointerdown jest skrotem do
+     tego samego, a nie jedyna droga - stad group, a nie button. -->
+<section class="tile" class:active role="group" aria-label={widget.title} onpointerdown={onactivate}>
   <header class="head">
     <span class="dot" style:background={widget.accent}></span>
     <h2 class="title">{widget.title}</h2>
+    {#if source != null}
+      <span class="source" title={source}>{source}</span>
+    {/if}
     <button type="button" class="close" title={t("close_tile")} aria-label={t("close_tile")} onclick={onclose}>
       <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
         <path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -119,6 +134,18 @@
     font-size: 14.5px;
     font-weight: 600;
     letter-spacing: 0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Host obcego modulu - szary, maly i ustepujacy tytulowi przy waskim kafelku.
+     Ma byc czytelny, gdy sie go szuka, i nie przeszkadzac, gdy sie go nie szuka. */
+  .source {
+    overflow: hidden;
+    max-width: 45%;
+    flex: none;
+    color: var(--fd-muted);
+    font-size: 11.5px;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

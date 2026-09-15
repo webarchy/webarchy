@@ -46,6 +46,21 @@ describe("wallpapers", () => {
     expect(wallpaperSwatch(findWallpaper("forest"))).toStartWith("linear-gradient(")
   })
 
+  // Adres tapety wchodzi prosto w url("...") w CSS, wiec cudzyslow nie moze z niego
+  // wyjsc zywy - domknalby url() i otworzyl reszte deklaracji. Dzis koduje go juz
+  // WHATWG URL w assetUrl(), ale to jest wlasnosc CSS-a, a nie tamtego modulu, wiec
+  // pilnujemy jej tutaj. Wallpaper skladany recznie, zeby test nie zalezal od tego,
+  // ktora warstwa akurat kodowanie wykonala.
+  test("cudzyslow w adresie nie wychodzi z url()", () => {
+    const wall: Wallpaper = {
+      id: "atak", name: "wall_mountains", deep: "0 0 0", hues: ["0 0 0", "0 0 0", "0 0 0"],
+      image: 'https://example.com/a".webp',
+    }
+
+    expect(wallpaperSwatch(wall)).not.toContain('a".webp')
+    expect(wallpaperSwatch(wall)).toContain("a%22.webp")
+  })
+
   // Kolory sluza takze za tlo zapasowe, gdy obrazek sie nie dociagnie.
   test("kazda tapeta ma komplet kolorow", () => {
     for (const wall of WALLPAPERS) {

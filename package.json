@@ -16,7 +16,7 @@
     "build:prod": "bun scripts/build.js --prod",
     "test": "bun run test:types && bun run test:svelte && bun run test:unit",
     "test:types": "bunx tsc --noEmit -p tsconfig.json",
-    "test:svelte": "bunx svelte-check --workspace src --threshold error",
+    "test:svelte": "bunx svelte-check --workspace src --threshold warning",
     "test:unit": "bun test src"
   },
   "devDependencies": {

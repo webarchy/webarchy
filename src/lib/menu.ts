@@ -23,7 +23,7 @@ import {
 import { installWebApp } from "./webapps.js"
 import {
   allWidgets, builtinAbout, builtinNote, builtinWidgets, isUninstalled, linkKind, restoreWidget,
-  uninstallWidget, widgetList, type BuiltinKind, type WidgetKind,
+  uninstallWidget, widgetList, widgetSourceLookup, type BuiltinKind, type WidgetKind,
 } from "./widgets.js"
 
 export interface MenuItem {
@@ -194,6 +194,12 @@ function wallpaperMenu(): MenuNode {
 // wbudowana pozycja zostaje wyszarzona i wraca ponownym Enterem, bo inaczej byloby to
 // wyjscie w jedna strone - wbudowanego widgetu nie da sie "zainstalowac" z powrotem.
 function uninstallMenu(actions: MenuActions): MenuNode {
+  // Host apki spod adresu stoi w tym samym szarym dopisku co stan - to lista, na
+  // ktorej uzytkownik decyduje, co wyrzucic, wiec musi tu byc widac, czyj kod
+  // wlasciwie chodzi na pulpicie. "Odinstalowana" wygrywa, bo to stan chwilowy,
+  // ktory Enter zaraz zmieni.
+  const hostOf = widgetSourceLookup()
+
   return {
     id: "uninstall",
     label: t("menu_uninstall"),
@@ -206,7 +212,7 @@ function uninstallMenu(actions: MenuActions): MenuNode {
         id: widget.kind,
         label: widget.title,
         swatch: widget.accent,
-        detail: gone ? t("uninstall_hidden") : undefined,
+        detail: gone ? t("uninstall_hidden") : hostOf(widget.kind) ?? undefined,
         run: () => {
           if (gone) {
             restoreWidget(widget.kind)

@@ -9,6 +9,7 @@
 // i nic w rdzeniu nie musi wiedziec, ze istnieje cos takiego jak strona w ramce.
 import { currentLocale } from "./i18n.js"
 import { uniqueId } from "./ids.js"
+import { readList, writeJson } from "./store.js"
 import { normalizeUrl, pageOrigin } from "./url.js"
 
 export interface WebApp {
@@ -95,17 +96,8 @@ export function webAppAccent(url: string): string {
   return `hsl(${hue} 68% 58%)`
 }
 
-// localStorage potrafi rzucic (tryb prywatny, zablokowane ciasteczka) albo zawierac
-// smiec po recznej edycji - w obu wypadkach pulpit ma wstac z pusta lista, a nie paść.
 export function readWebApps(): WebApp[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
-    if (!Array.isArray(parsed)) return []
-
-    return parsed.filter(isWebApp)
-  } catch {
-    return []
-  }
+  return readList(STORAGE_KEY, isWebApp)
 }
 
 function isWebApp(value: unknown): value is WebApp {
@@ -114,11 +106,8 @@ function isWebApp(value: unknown): value is WebApp {
 }
 
 function saveWebApps(apps: readonly WebApp[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(apps))
-  } catch {
-    // trudno - aplikacja zostanie do konca sesji
-  }
+  // trudno - aplikacja zostanie do konca sesji
+  writeJson(STORAGE_KEY, apps)
 }
 
 // Zwraca zainstalowana aplikacje albo null, gdy adres jest nie do uzycia.

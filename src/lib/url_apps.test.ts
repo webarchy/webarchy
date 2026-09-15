@@ -2,8 +2,8 @@ import { afterAll, beforeEach, describe, expect, test } from "bun:test"
 import { bundleBase, setBundleBase } from "./bundle.js"
 import { stubBrowser } from "./testing.js"
 import {
-  findUrlAppBySrc, installUrlApp, isRunnableSrc, isUrlAppKind, LIST_LIMIT, readUrlApps, removeUrlApp, urlAppAccent,
-  urlAppKind, urlAppList,
+  findUrlAppBySrc, installUrlApp, isRunnableSrc, isUrlAppKind, LIST_LIMIT, moduleHost, readUrlApps, removeUrlApp,
+  urlAppAccent, urlAppKind, urlAppList,
 } from "./url_apps.js"
 
 const BASE = "https://apps.example/static/webarchy-1.0.js"
@@ -97,5 +97,33 @@ describe("readUrlApps", () => {
 
     localStorage.setItem("webarchy-urlapps", '[{"id":"a"},{"id":"b","name":"B","src":"apps/b.js"}]')
     expect(readUrlApps().map((app) => app.id)).toEqual(["b"])
+  })
+})
+
+describe("moduleHost", () => {
+  // Wpis katalogowy lezy obok bundla - nie ma tu zadnego obcego serwera,
+  // wiec nie ma o czym mowic uzytkownikowi.
+  test("modul obok bundla nie ma hosta do pokazania", () => {
+    expect(moduleHost("apps/pomodoro.js")).toBe(null)
+  })
+
+  test("pelny adres na tym samym hoscie co bundel tez nie", () => {
+    expect(moduleHost("https://apps.example/static/inny.js")).toBe(null)
+  })
+
+  // To jest przypadek, dla ktorego ta funkcja istnieje: kod z cudzego serwera,
+  // ktory wlasciciel moze podmienic w kazdej chwili.
+  test("obcy host wraca do pokazania", () => {
+    expect(moduleHost("https://evil.example/app.js")).toBe("evil.example")
+  })
+
+  test("www. odpada, tak jak przy aplikacjach webowych", () => {
+    expect(moduleHost("https://www.cdn.example/app.js")).toBe("cdn.example")
+  })
+
+  // Adres, spod ktorego i tak nic nie uruchomimy, nie ma czego zglaszac.
+  test("adres nie do uruchomienia nie ma hosta", () => {
+    expect(moduleHost("javascript:alert(1)")).toBe(null)
+    expect(moduleHost("")).toBe(null)
   })
 })

@@ -7,7 +7,7 @@ import WeatherWidget from "../widgets/WeatherWidget.svelte"
 import WebAppWidget from "../widgets/WebAppWidget.svelte"
 import { catalogApps, catalogSrc, catalogTitle } from "./catalog.js"
 import { t } from "./i18n.js"
-import { hide, isHidden, unhide } from "./installed.js"
+import { hide, isHidden, readHidden, unhide } from "./installed.js"
 import { jsWidget, urlWidget } from "./js_widget.js"
 import {
   isJsAppKind, jsAppAccent, jsAppKind, jsAppList, JS_PREFIX, removeJsApp, type JsApp, type JsAppKind,
@@ -15,7 +15,8 @@ import {
 import { svelteWidget } from "./svelte_widget.js"
 import { normalizeUrl } from "./url.js"
 import {
-  APP_PREFIX, isUrlAppKind, removeUrlApp, urlAppAccent, urlAppKind, urlAppList, type UrlApp, type UrlAppKind,
+  APP_PREFIX, isUrlAppKind, moduleHost, removeUrlApp, urlAppAccent, urlAppKind, urlAppList,
+  type UrlApp, type UrlAppKind,
 } from "./url_apps.js"
 import {
   isDefaultWebApp, isWebAppKind, removeWebApp, webAppAccent, webAppKind, webAppName, WEB_PREFIX, webAppList,
@@ -145,8 +146,14 @@ function urlAppWidget(app: UrlApp): WidgetDef<WidgetKind> {
 
 // Rejestr jest funkcja, a nie stala, bo aplikacje dochodza i znikaja w trakcie zycia
 // strony - czytamy go przy kazdym otwarciu menu i przy montowaniu kafelka.
+//
+// Liste ukrytych bierzemy RAZ, przed filtrem. isHidden() sam siega do localStorage
+// i parsuje JSON, wiec w filtrze kosztowalby jeden odczyt na widget - a caly rejestr
+// buduje sie przy kazdym kafelku i przy kazdym lisciu przywracanego ukladu.
 export function widgetList(): WidgetDef<WidgetKind>[] {
-  return allWidgets().filter((widget) => !isHidden(widget.kind))
+  const hidden = readHidden()
+
+  return allWidgets().filter((widget) => !hidden.includes(widget.kind))
 }
 
 // Razem z odinstalowanymi - tego potrzebuje tylko menu "Odinstaluj", zeby moglo
@@ -162,6 +169,25 @@ export function allWidgets(): WidgetDef<WidgetKind>[] {
 
 export function isUninstalled(kind: string): boolean {
   return isHidden(kind)
+}
+
+// Skad przyjdzie kod tej apki - host cudzego serwera albo null, gdy nie ma o czym
+// mowic (apka wbudowana, wklejony kod, modul obok bundla). Patrz url_apps.ts,
+// moduleHost: to jedyne pochodzenie, ktore uzytkownik ma widziec takze po instalacji.
+export function widgetSource(kind: string): string | null {
+  return widgetSourceLookup()(kind)
+}
+
+// To samo pytanie zadawane seryjnie - menu pyta raz na pozycje listy, a kazde
+// widgetSource() to osobny odczyt localStorage'u (jak przy knownWidgetCheck nizej).
+export function widgetSourceLookup(): (_kind: string) => string | null {
+  const hosts = new Map<string, string>()
+  for (const app of urlAppList()) {
+    const host = moduleHost(app.src)
+    if (host != null) hosts.set(urlAppKind(app), host)
+  }
+
+  return (kind) => hosts.get(kind) ?? null
 }
 
 // Wbudowana i domyslna aplikacja tylko sie chowa (siedzi w kodzie, wiec wraca),
@@ -192,9 +218,20 @@ export function restoreWidget(kind: string) {
 // Czy klucz jeszcze cos znaczy. Pyta o to przywracany uklad (lib/layout_store.ts):
 // zapisany kafelek z odinstalowana aplikacja ma zniknac, a nie zamienic sie w cos innego.
 export function isKnownWidget(kind: string): boolean {
-  if (isLinkKind(kind)) return linkWidget(kind) != null
+  return knownWidgetCheck()(kind)
+}
 
-  return findInRegistry(widgetList(), kind) != null
+// To samo pytanie, ale zadawane seryjnie. Przywracany uklad pyta raz na LISC, a kazde
+// isKnownWidget() budowaloby caly rejestr od nowa - razem z odczytem localStorage na
+// wpisane aplikacje i na liste ukrytych. Tu rejestr powstaje raz, a lisc dostaje
+// sprawdzenie w zbiorze.
+//
+// Adresy ("link:...") zostaja poza zbiorem: ich caly wpis siedzi w samym kluczu, wiec
+// nie ma ich w rejestrze i rozstrzyga sam ksztalt adresu.
+export function knownWidgetCheck(): (_kind: string) => boolean {
+  const kinds = new Set<string>(widgetList().map((widget) => widget.kind))
+
+  return (kind) => (isLinkKind(kind) ? linkWidget(kind) != null : kinds.has(kind))
 }
 
 // Nieznany klucz (odinstalowana aplikacja, stary stan) nie wywraca pulpitu - dostaje

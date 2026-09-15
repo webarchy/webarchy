@@ -8,6 +8,7 @@
 // wstac pusty, a nie paść, dlatego drzewo przechodzi walidacje ksztaltu i przyciecie
 // nieznanych widgetow, zamiast trafiac do stanu prosto z JSON.parse.
 import { leaves, type TreeNode } from "../core/index.js"
+import { readJson, writeJson } from "./store.js"
 
 const STORAGE_KEY = "webarchy-layout"
 
@@ -38,8 +39,11 @@ export interface StoredLayout {
 // `known` odpowiada na pytanie, czy widget o takim kluczu jeszcze istnieje - rejestr
 // zna tylko host (lib/widgets.ts), a ten modul ma nie wiedziec, co siedzi w lisciach.
 export function readLayout(known: (widget: string) => boolean): StoredLayout | null {
+  // Walidacja ksztaltu jest rekurencyjna (isTree, prune), wiec recznie zagniezdzony
+  // zapis potrafi przepelnic stos - stad try/catch takze wokol samego przetwarzania,
+  // nie tylko wokol odczytu.
   try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null")
+    const parsed = readJson<unknown>(STORAGE_KEY, null)
     const stored = storedDesks(parsed)
     if (stored == null) return null
 
@@ -71,11 +75,8 @@ export function saveLayoutSoon(state: StoredLayout) {
 }
 
 function write(state: StoredLayout) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // prywatne okno albo zablokowany storage - uklad zyje do konca sesji
-  }
+  // prywatne okno albo zablokowany storage - uklad zyje do konca sesji
+  writeJson(STORAGE_KEY, state)
 }
 
 // Zapis z wersji sprzed pulpitow byl jednym drzewem ({ root, activeId }) - wchodzi

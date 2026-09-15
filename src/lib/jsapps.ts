@@ -8,6 +8,7 @@
 //
 // Klucz widgetu ma postac "js:<id>", wiec drzewo BSP dalej trzyma zwykly string.
 import { uniqueId } from "./ids.js"
+import { readList, writeJson } from "./store.js"
 
 export interface JsApp {
   id: string
@@ -52,17 +53,8 @@ export function isRunnableCode(code: string): boolean {
   return text !== "" && text.length <= CODE_LIMIT && /\bexport\b/.test(text)
 }
 
-// localStorage potrafi rzucic (tryb prywatny, zablokowane ciasteczka) albo zawierac
-// smiec po recznej edycji - w obu wypadkach pulpit ma wstac z pusta lista, a nie pasc.
 export function readJsApps(): JsApp[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
-    if (!Array.isArray(parsed)) return []
-
-    return parsed.filter(isJsApp)
-  } catch {
-    return []
-  }
+  return readList(STORAGE_KEY, isJsApp)
 }
 
 function isJsApp(value: unknown): value is JsApp {
@@ -71,11 +63,8 @@ function isJsApp(value: unknown): value is JsApp {
 }
 
 function saveJsApps(apps: readonly JsApp[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(apps))
-  } catch {
-    // trudno - aplikacja zostanie do konca sesji
-  }
+  // trudno - aplikacja zostanie do konca sesji
+  writeJson(STORAGE_KEY, apps)
 }
 
 export function jsAppList(): JsApp[] {
