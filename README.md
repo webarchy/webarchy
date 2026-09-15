@@ -4,6 +4,16 @@
 screen. Everything is one keystroke away. There is no server, no account and no build step
 between you and your own app.
 
+<p align="center">
+  <a href="https://webarchy.dev/run"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20demo-webarchy.dev%2Frun-f472b6?style=for-the-badge&labelColor=160f22" alt="Live demo at webarchy.dev/run" height="42"></a>
+</p>
+
+## ▶ Try it live: [webarchy.dev/run](https://webarchy.dev/run)
+
+The real desktop runs there, in your browser - nothing to install, no account, no sign-up.
+Open it, press `Alt`+`Space` for the menu and start splitting tiles. Everything you set up
+stays in that browser.
+
 🌐 **[webarchy.dev](https://webarchy.dev/)** · MIT licensed · zero runtime dependencies
 
 Open a tab and you get a desktop: nine workspaces, a keyboard-driven menu, themes,
@@ -186,6 +196,7 @@ Contributions are welcome in either language.
 ## Links
 
 - Website: [webarchy.dev](https://webarchy.dev/)
+- Live demo: [webarchy.dev/run](https://webarchy.dev/run)
 - Source: [github.com/webarchy/webarchy](https://github.com/webarchy/webarchy)
 - Inspiration: [Omarchy](https://omarchy.org) · [Hyprland](https://hypr.land)
 
