@@ -21,6 +21,8 @@ const STORAGE_KEY = "webarchy-browser"
 // martwych adresow to zaden koszt, a rosnaca w nieskonczonosc lista juz tak.
 export const LIST_LIMIT = 24
 
+// Te same try/catch co w lib/store.ts i ta sama decyzja co w widgets/todo/store.ts:
+// apka nie siega do lib/, bo ma dac sie przepisac do siebie w calosci.
 export function readVisits(): Visit[] {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
