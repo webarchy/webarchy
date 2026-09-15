@@ -72,7 +72,7 @@ Układ wzięty z [Omarchy](https://omarchy.org) (Hyprland) razem z jego regułą
 
 | Skrót | Co robi |
 |---|---|
-| `Super`+`Spacja` | menu pulpitu |
+| `Super`+`Spacja` / `Super`+`Enter` | menu pulpitu |
 | `Super`+`W` | zamknij kafelek |
 | `Super`+`F` | kafelek na cały pulpit (i z powrotem) |
 | strzałki / `hjkl` | zmień aktywny kafelek |
@@ -94,6 +94,14 @@ zabierałby użytkownikowi literę.
 w interfejsie. Powód jest fizyczny, nie estetyczny: `Cmd`+`Spacja` przechwytuje
 Spotlight, `Cmd`+`W` zamyka kartę mimo `preventDefault`, a na Linuksie `Super` należy do
 kompozytora - strona po prostu nigdy nie dostaje tych zdarzeń. `Alt` dochodzi wszędzie.
+
+Z jednym wyjątkiem: **`Alt`+`Spacja` dochodzi do strony tylko na macOS**. GNOME otwiera nią
+menu okna (`activate-window-menu`), KDE - KRunnera, a na Windowsie Chrome oddaje ją menu
+systemowemu okna, zanim strona zobaczy zdarzenie - `preventDefault` nic tu nie zmienia.
+Dlatego to samo menu otwiera też `Alt`+`Enter`, a podpowiedź w pasku pokazuje poza macOS
+właśnie ten skrót; spis skrótów (`Alt`+`K`) wymienia oba. Poza macOS spis skrótów i okno
+„O Webarchy" mają też jedno zdanie o tym, dlaczego (`menuNote` w `lib/keys.ts`) - z user
+agenta nie odróżnimy GNOME od Hyprlanda, więc treść mówi „zwykle".
 
 `Meta` **odrzucamy od razu**, zanim reguła spojrzy na cokolwiek innego. Kiedyś był to
 drugi wariant `Super` i pulpit zjadał `Cmd`+`1..9`, czyli przełączanie kart w przeglądarce.

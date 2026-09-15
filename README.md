@@ -11,7 +11,7 @@ between you and your own app.
 ## ▶ Try it live: [webarchy.dev/run](https://webarchy.dev/run)
 
 The real desktop runs there, in your browser - nothing to install, no account, no sign-up.
-Open it, press `Alt`+`Space` for the menu and start splitting tiles. Everything you set up
+Open it, press `Alt`+`Space` (or `Alt`+`Enter`) for the menu and start splitting tiles. Everything you set up
 stays in that browser.
 
 🌐 **[webarchy.dev](https://webarchy.dev/)** · MIT licensed · zero runtime dependencies
@@ -29,7 +29,7 @@ both and brings their ergonomics to a browser tab.
 
 ## Why it might interest you
 
-- **Keyboard first, mouse optional.** `Super`+`Space` opens the menu, typing narrows it,
+- **Keyboard first, mouse optional.** `Super`+`Space` (or `Super`+`Enter`) opens the menu, typing narrows it,
   `Enter` runs it. Arrows (or `hjkl`) walk the tiles, `Super`+`1…9` switches workspaces.
 - **No backend, ever.** Layout, theme, installed apps and app data live in `localStorage`.
   Nothing is sent anywhere, so nothing can leak. "Reset system" wipes it in one move.
@@ -101,7 +101,7 @@ and that is what the interface shows. `Cmd`/`Meta` is deliberately ignored, so
 
 | Shortcut | Action |
 |---|---|
-| `Super`+`Space` | desktop menu |
+| `Super`+`Space` / `Super`+`Enter` | desktop menu |
 | `Super`+`W` | close tile |
 | `Super`+`F` | zoom tile to the full desktop (and back) |
 | arrows / `hjkl` | move focus between tiles |
@@ -112,6 +112,11 @@ and that is what the interface shows. `Cmd`/`Meta` is deliberately ignored, so
 | `Super`+`Ctrl`+`Space` | jump straight to the wallpaper picker |
 | `Super`+`K` | full list of shortcuts |
 | mouse | drag the gutter between tiles |
+
+`Alt`+`Space` reaches the page only on macOS: GNOME opens the window menu with it, KDE opens
+KRunner, and on Windows Chrome hands it to the window's system menu before the page sees it.
+`Alt`+`Enter` opens the same menu everywhere, and that is the combo the desktop shows in its
+hint bar outside macOS.
 
 Below 700 px the tiles stack into one scrollable column.
 

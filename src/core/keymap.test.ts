@@ -8,6 +8,18 @@ describe("commandForKey", () => {
     expect(commandForKey({ key: "k", altKey: true })).toEqual({ type: "show_keys" })
   })
 
+  // Alt+Spacja zabiera system, zanim zobaczy ja przegladarka: GNOME otwiera nia menu okna,
+  // KDE - KRunnera, a Windows - menu systemowe okna. Alt+Enter dochodzi do strony wszedzie,
+  // wiec jest drugim wejsciem do tego samego menu - takze w polu tekstowym i z numpada.
+  test("super+enter otwiera menu tam, gdzie system zjada super+spacje", () => {
+    expect(commandForKey({ key: "Enter", altKey: true })).toEqual({ type: "open_menu" })
+    expect(commandForKey({ key: "Enter", code: "NumpadEnter", altKey: true })).toEqual({ type: "open_menu" })
+    expect(commandForKey({ key: "Enter", altKey: true }, true)).toEqual({ type: "open_menu" })
+    // Sam Enter i Ctrl+Enter zostaja polu tekstowemu (zatwierdzanie formularzy).
+    expect(commandForKey({ key: "Enter" })).toBeNull()
+    expect(commandForKey({ key: "Enter", ctrlKey: true })).toBeNull()
+  })
+
   // Cmd nalezy do przegladarki: Cmd+1..9 przelacza karty, Cmd+W zamyka karte.
   // Pulpit nie moze tego zjadac - modyfikatorem pulpitu jest wylacznie alt.
   test("meta zostawiamy przegladarce", () => {
